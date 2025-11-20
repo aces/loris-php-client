@@ -80,8 +80,7 @@ class ClinicalPipeline
         // Initialize Database (FALLBACK #3: Direct SQL when needed)
         $this->db = new Database($config, $this->logger);
 
-        // Initialize notifications
-        $this->notification = new Notification($config, $this->logger);
+        $this->notification = new Notification();
     }
 
     /**
@@ -211,16 +210,23 @@ class ClinicalPipeline
         }
 
         // Process each instrument
-        $projectStats = ['total' => 0, 'success' => 0, 'failed' => 0, 'skipped' => 0];
+        $projectStats = [
+            'total'   => 0,
+            'success' => 0,
+            'failed'  => 0,
+            'skipped' => 0
+        ];
 
         foreach ($instruments as $instrument) {
             $result = $this->processInstrument($project, $instrument, $clinicalDir);
-            $projectStats[$result]++;
-            $this->stats[$result]++;
+
+            $projectStats['total']++;   // ADD THIS
+            $projectStats[$result]++;   // success/failed/skipped
         }
 
         // Send notification
         $this->sendProjectNotification($project, $projectStats);
+        echo "sdsdsds";
     }
 
     /**
@@ -458,63 +464,60 @@ class ClinicalPipeline
      * - If ALL successful → send SUCCESS email
      * - Respects enable/disable flags at all levels
      */
+    /**
+     * Send project notification for clinical modality
+     */
     private function sendProjectNotification(array $project, array $projectStats): void
     {
-        $projectName = $project['project_common_name'];
+        echo "\n=== DEBUG: Entering sendProjectNotification() ===\n";
+
         $modality = 'clinical';
+        $projectName = $project['project_common_name'];
 
-        // Get notification configuration for this modality
-        $notificationConfig = $project['notification_emails'][$modality] ?? [];
-
-        // Check if notifications are enabled for this modality in project config
-        if (isset($notificationConfig['enabled']) && $notificationConfig['enabled'] === false) {
-            $this->logger->debug("Notifications disabled for {$modality} in project config");
-            return;
-        }
-
-        // Nothing to notify about if nothing was processed
-        $totalProcessed = ($projectStats['total'] ?? 0);
-        if ($totalProcessed === 0) {
-            $this->logger->debug("No files processed for {$modality}, skipping notification");
-            return;
-        }
-
-        // Determine if we should send success or error notification
+        // Determine success or failure
         $hasFailures = ($projectStats['failed'] ?? 0) > 0;
-        $hasSuccess = ($projectStats['success'] ?? 0) > 0;
 
-        // Priority: Send error notification if there were ANY failures
-        if ($hasFailures) {
-            $recipients = $notificationConfig['on_error'] ?? [];
-            if (!empty($recipients)) {
-                $this->logger->info("Sending error notification for {$modality} to: " . implode(', ', $recipients));
-                $this->notification->sendError(
-                    $modality,
-                    $projectName,
-                    "Clinical processing completed with errors",
-                    $projectStats,
-                    $recipients
-                );
-            } else {
-                $this->logger->debug("No error recipients configured for {$modality}");
-            }
+        // Read email lists from project.json
+        $successEmails = $project['notification_emails'][$modality]['on_success'] ?? [];
+        $errorEmails   = $project['notification_emails'][$modality]['on_error'] ?? [];
+
+        // Choose which email list to use
+        $emailsToSend = $hasFailures ? $errorEmails : $successEmails;
+
+        if (empty($emailsToSend)) {
+            echo "DEBUG: No email defined. Skipping.\n";
+            return;
         }
-        // Send success notification only if ALL processing succeeded (no failures)
-        elseif ($hasSuccess) {
-            $recipients = $notificationConfig['on_success'] ?? [];
-            if (!empty($recipients)) {
-                $this->logger->info("Sending success notification for {$modality} to: " . implode(', ', $recipients));
-                $this->notification->sendSuccess(
-                    $modality,
-                    $projectName,
-                    $projectStats,
-                    $recipients
-                );
-            } else {
-                $this->logger->debug("No success recipients configured for {$modality}");
-            }
+
+        echo "DEBUG: Email list found → " . implode(", ", $emailsToSend) . "\n";
+
+        // Build subject
+        $subject = $hasFailures
+            ? "FAILED: $projectName Clinical Ingestion"
+            : "SUCCESS: $projectName Clinical Ingestion";
+
+        // Build body
+        $body  = "Project: $projectName\n";
+        $body .= "Modality: $modality\n\n";
+        $body .= "Files Processed: {$projectStats['total']}\n";
+        $body .= "Successfully Uploaded: {$projectStats['success']}\n";
+        $body .= "Failed: {$projectStats['failed']}\n";
+        $body .= "Skipped: {$projectStats['skipped']}\n\n";
+
+        if ($hasFailures) {
+            $body .= "⚠ Some files failed to ingest.\n";
+            $body .= "Check logs for details.\n";
+        } else {
+            $body .= "✔ Ingestion completed successfully.\n";
+        }
+
+        // SEND EMAIL(S) — using simple mail()
+        foreach ($emailsToSend as $emailTo) {
+            echo "DEBUG: Sending email to: $emailTo\n";
+            $this->notification->send($emailTo, $subject, $body);
         }
     }
+
 
     /**
      * Print summary

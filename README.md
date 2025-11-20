@@ -112,15 +112,15 @@ php examples/run_clinical_pipeline.php --all --verbose
 
 ### Command-Line Options
 
-| Option | Description | Example |
-|--------|-------------|---------|
-| `--all` | Process all projects | `--all` |
+| Option | Description | Example                          |
+|--------|-------------|----------------------------------|
+| `--all` | Process all projects | `--all`                          |
 | `--collection=NAME` | Specific collection | `--collection=example_collection` |
-| `--project=NAME` | Specific project | `--project=PROJECT_A` |
-| `--instrument=NAME` | Specific instrument | `--instrument=demographics` |
-| `--dry-run` | Test without changes | `--dry-run` |
-| `--verbose` | Detailed output | `--verbose` |
-| `--help` | Show help | `--help` |
+| `--project=NAME` | Specific project | `--project=PROJECT_A`            |
+| `--instrument=NAME` | Specific instrument | `--instrument=instr`             |
+| `--dry-run` | Test without changes | `--dry-run`                      |
+| `--verbose` | Detailed output | `--verbose`                      |
+| `--help` | Show help | `--help`                         |
 
 ---
 

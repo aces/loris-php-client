@@ -1,23 +1,23 @@
 # LORIS-ARCHIMEDES Pipelines
 
-Automated data ingestion pipelines for [LORIS](https://github.com/aces/Loris) using the [loris-php-client](https://github.com/aces/loris-php-client) library.
+Automated data ingestion pipelines for ARCHIMEDES study using the [oris-php-api-client](https://github.com/aces/loris-php-api-client) library.
 
 This repository provides production-ready pipelines for clinical and imaging data ingestion, with features like bulk CSV upload, automated candidate creation, email notifications, and comprehensive logging.
 
-The pipelines are expected to be installed on the predefined data mount, which follows a fixed directory structure, and each project must include its own `project.json' file.
+The pipelines are expected to be installed on the predefined data mount for the collection of projects, which follows a fixed directory structure, and each project must include its own `project.json` file.
 
 ---
 
 ## Features
 
-- ✅ **Clinical Data Ingestion** - Automated CSV processing and upload
-- ✅ **Candidate Management** - Automatic candidate and visit creation
-- ✅ **Bulk Operations** - Process multiple files and projects
-- ✅ **Email Notifications** - Success/failure reports via email
-- ✅ **Comprehensive Logging** - Detailed execution logs with rotation
-- ✅ **Dry Run Mode** - Test without making actual changes
-- ✅ **Database Fallback** - Direct SQL access when API unavailable
-- ✅ **Multi-Project Support** - Handle multiple projects and collections
+-  **Clinical Data Ingestion** - Automated CSV processing and upload
+-  **Candidate Management** - Automatic candidate and visit creation
+-  **Bulk Operations** - Process multiple files and projects
+-  **Email Notifications** - Success/failure reports via email
+-  **Comprehensive Logging** - Detailed execution logs with rotation
+-  **Dry Run Mode** - Test without making actual changes
+-  **Imaging Data Ingestion** - BIDS data set Ingestion
+-  **Multi-Project Support** - Handle multiple projects and collections
 
 ---
 
@@ -25,7 +25,7 @@ The pipelines are expected to be installed on the predefined data mount, which f
 
 - PHP >= 8.1
 - Composer
-- [loris-php-client](https://github.com/aces/loris-php-client) (installed automatically)
+-  [loris-php-api-client](https://github.com/aces/loris-php-api-client) (installed automatically)
 - MySQL/MariaDB (for database fallback operations)
 - Extensions: `curl`, `json`, `pdo`, `mbstring`
 
@@ -36,7 +36,7 @@ The pipelines are expected to be installed on the predefined data mount, which f
 ```bash
 # Clone repository
 cd /opt
-git clone https://github.com/aces/loris-pipelines.git
+git clone https://github.com/aces/archimedes-pipelines.git
 cd loris-pipelines
 
 # Install dependencies (including loris-php-client)
@@ -140,7 +140,6 @@ php examples/run_clinical_pipeline.php --all --verbose
 │              │ uses                 │
 │              ▼                       │
 │  ┌───────────────────────────────┐  │
-│  │  Database utilities           │  │
 │  │  Email notifications          │  │
 │  │  Logging infrastructure       │  │
 │  └───────────────────────────────┘  │

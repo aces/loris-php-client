@@ -124,6 +124,7 @@ php scripts/run_clinical_pipeline.php --all --verbose
 
 ---
 
+
 ## Pipeline Architecture
 
 ```
@@ -160,6 +161,47 @@ php scripts/run_clinical_pipeline.php --all --verbose
 │      LORIS API Server                │
 │   https://your-loris.org/api/v0.0.4  │
 └──────────────────────────────────────┘
+```
+
+---
+
+### Directory Structure
+
+```
+/BHI_CBIG_SharedStorage/Projects/{ProjectName}/
+├── project.json                          # Project metadata & configuration
+│
+├── deidentified-raw/                     # Fully de-identified participant data
+│   ├── demographics_archimedes.csv       # Standard demographics for all projects
+│   ├── demographics_project.csv          # Additions to the standard form
+│   ├── imaging/
+│   │   ├── dicoms/                       # Raw medical imaging data (non-BIDS)
+│   │   └── bids/                         # Standardized BIDS structured datasets
+│   ├── clinical/                         # Patient records & behavioural assessments
+│   ├── eeg/                              # Raw EEG data (non-BIDS)
+│   └── genomics/                         # Genomic & epigenetic sequencing data
+│
+├── deidentified-lorisid/                 # LORIS-relabelled participant data
+│   ├── imaging/
+│   │   ├── dicoms/                       # Raw medical imaging data with LORIS Labels
+│   │   └── bids/                         # Standardized BIDS structured datasets
+│   ├── clinical/                         # Patient records & behavioural assessments
+│   ├── eeg/                              # EEG signals and event logs
+│   └── genomics/                         # Genomic & epigenetic sequencing data
+│
+├── deidentified-OPENID/                  # Different ID than LORIS ID (same subdivision)
+│   └── bids/                             # Standardized BIDS structured datasets
+│
+├── processed/                            # Data after CBIG/LORIS processing
+│   ├── freesurfer-output/                # Converted & cleaned data (NIfTI, MINC)
+│   ├── bids/                             # Processed BIDS data
+│   │   ├── subjects/                     # Various subjects for BIDS
+│   │   └── derivatives/                  # Processed EEG data
+│   └── .imaging_processed/               # Hidden directory for processing markers
+│
+└── documentation/                        # Ethics, informed consent, and protocols
+    ├── data_dictionary/                  # Variable descriptions & mappings
+    └── readme.txt                        # Information about data structure
 ```
 
 ---
